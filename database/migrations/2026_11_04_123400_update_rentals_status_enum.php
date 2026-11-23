@@ -1,0 +1,35 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('rentals', function (Blueprint $table) {
+            $table->enum('status', [
+                'menunggu_pembayaran',
+                'dibayar',
+                'diambil',
+                'selesai',
+                'dibatalkan',
+                'kadaluarsa',
+            ])->default('menunggu_pembayaran')->change();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('rentals', function (Blueprint $table) {
+            $table->enum('status', ['baru', 'dirental', 'selesai'])->default('baru')->change();
+        });
+    }
+};

@@ -1,0 +1,132 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import "flowbite/src/themes/default";
+@plugin "flowbite/plugin";
+@source "../../node_modules/flowbite";
+
+@layer base {
+    :root {
+        --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+        --color-primary: #0f0f0f;
+        --color-primary-hover: #1a1a1a;
+        --color-secondary: #14532d;
+        --color-accent: #40916c;
+        --color-accent-light: #52b788;
+        --color-cream: #f1faee;
+        --color-cream-dark: #dcedc1;
+    }
+
+    .primary-green {
+        --color-primary: #14532d;
+        --color-primary-hover: #1b4332;
+    }
+
+    .primary-black {
+        --color-primary: #0f0f0f;
+        --color-primary-hover: #1a1a1a;
+    }
+}
+
+.loader {
+  --color-1: rgba(255, 255, 255, 0.8);
+  --color-2: #fff;
+  --size: 1px;
+
+  width: calc(64 * var(--size));
+  height: calc(64 * var(--size));
+  border-radius: 50%;
+  position: relative;
+  background: var(--color-1);
+}
+.loader:before,
+.loader:after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: calc(64 * var(--size));
+  height: calc(64 * var(--size));
+  border-radius: 50%;
+  background: var(--color-2);
+  animation: slide 1s infinite linear alternate;
+  opacity: 0.5;
+}
+.loader:after {
+  animation: slide2 1s infinite linear alternate;
+  opacity: 1;
+}
+@keyframes slide {
+  0%,
+  20% {
+    transform: translate(0, 0);
+  }
+  80%,
+  100% {
+    transform: translate(calc(15 * var(--size)), calc(15 * var(--size)));
+  }
+}
+@keyframes slide2 {
+  0%,
+  20% {
+    transform: translate(0, 0);
+  }
+  80%,
+  100% {
+    transform: translate(calc(-15 * var(--size)), calc(-15 * var(--size)));
+  }
+}
+
+@layer components {
+    .btn-primary {
+        @apply px-4 py-2 rounded-md font-semibold text-white transition-colors duration-200;
+        background-color: var(--color-primary);
+    }
+    .btn-primary:hover {
+        background-color: var(--color-primary-hover);
+    }
+
+    .btn-outline {
+        @apply px-4 py-2 rounded-md font-semibold text-gray-700 border border-gray-300 transition-colors duration-200;
+        background-color: transparent;
+    }
+    .btn-outline:hover {
+        @apply border-gray-400 text-gray-900 bg-gray-50;
+    }
+
+    .card {
+        @apply bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-shadow duration-200;
+    }
+    .card:hover {
+        @apply shadow-md;
+    }
+
+    .stat-card {
+        @apply bg-white rounded-xl shadow-sm border border-gray-100 p-6;
+    }
+
+    .nav-active {
+        @apply text-primary-600 border-b-2 border-primary-600;
+    }
+}
+
+
+
+    .cb {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 1.25rem;
+        height: 1.25rem;
+        flex-shrink: 0;
+        cursor: pointer;
+        background: #fff;
+        border: 2px solid #cbd5e1;
+        border-radius: 0.375rem;
+        transition: background-color .15s, border-color .15s;
+    }
+    .cb:hover { border-color: #40916c; }
+    .cb:checked {
+        border-color: #40916c;
+        background: #40916c url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E") center / 80% no-repeat;
+    }
+    .cb:focus-visible { outline: 2px solid #40916c; outline-offset: 2px; }
