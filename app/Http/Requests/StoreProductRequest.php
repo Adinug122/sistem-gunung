@@ -26,7 +26,7 @@ class StoreProductRequest extends FormRequest
         return [
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:20480',
             'description' => 'required|string',
             'price_per_day' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
@@ -43,7 +43,7 @@ class StoreProductRequest extends FormRequest
             'name.required' => 'Nama produk wajib diisi.',
             'image.image' => 'Gambar harus berupa file gambar.',
             'image.mimes' => 'Format gambar yang diizinkan: jpeg, png, jpg, webp.',
-            'image.max' => 'Ukuran gambar maksimal 2MB.',
+            'image.max' => 'Ukuran gambar maksimal 20MB.',
             'description.required' => 'Deskripsi wajib diisi.',
             'price_per_day.required' => 'Harga sewa per hari wajib diisi.',
             'price_per_day.numeric' => 'Harga harus berupa angka.',

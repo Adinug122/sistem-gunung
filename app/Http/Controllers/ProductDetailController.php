@@ -9,9 +9,11 @@ class ProductDetailController extends Controller
 {
     public function show(string $name): View
     {
-        $product = Product::with('category')
+        $product = Product::with(['category', 'variants'])
             ->where('name', $name)
             ->firstOrFail();
+
+        $availableVariants = $product->variants()->where('stock', '>', 0)->get();
 
         $relatedProducts = Product::with('category')
             ->where('category_id', $product->category_id)
@@ -21,6 +23,6 @@ class ProductDetailController extends Controller
             ->take(4)
             ->get();
 
-        return view('products.detail', compact('product', 'relatedProducts'));
+        return view('products.detail', compact('product', 'relatedProducts', 'availableVariants'));
     }
 }

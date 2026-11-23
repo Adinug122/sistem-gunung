@@ -9,8 +9,10 @@
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=poppins:400,500,600,700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=shopping_cart" />
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=shopping_cart,account_circle,person,location_on,history,notifications,local_offer,exit_to_app,badge,email,phone,people,cake,shield&display=block" rel="stylesheet">
+@vite(['resources/css/app.css', 'resources/js/app.js'])
         @stack('styles')
 
     </head>
@@ -26,17 +28,19 @@
                         @auth
                         <div class="flex gap-2 items-center justify-center" x-data="{}" data-cart-count="{{ collect(session('keranjang', []))->sum(fn($item) => $item['qty'] ?? 0) }}">
                             <a href="{{ route('keranjang') }}" class="relative group">
-                                <span class="material-symbols-outlined text-white">
+                                <span class="material-symbols-outlined text-white text-2xl">
                                     shopping_cart
                                 </span>
                                 <span x-show="$store.cart.count > 0" x-text="$store.cart.count"
                                       class="absolute -top-1 -right-1 bg-[#40916c] text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none">
                                 </span>
                             </a>
-<form action="{{ route('logout') }}" method="POST">
-    @csrf
-    <button type="submit" class="bg-red-500 px-4 py-2">Logout</button>
-</form>
+
+                            <a href="{{ route('customer.profile.edit') }}" class="relative group">
+                                <span class="material-symbols-outlined text-white text-2xl">
+                                    account_circle
+                                </span>
+                            </a>
                         </div>
                         @else
                             <a href="{{ route('login') }}" class="hidden rounded-lg border border-white px-4 py-2.5 text-sm font-medium leading-5 text-white hover:bg-white/10 focus:outline-none focus:ring-4 focus:ring-white/30 md:block">
@@ -65,22 +69,22 @@
                     >
                         <ul class="mt-4 flex w-full flex-col rounded-lg border border-white/20 p-4 font-medium md:mt-0 md:w-auto md:flex-row md:space-x-8 md:border-0 md:p-0">
                             <li>
-                                <a href="{{ route('home') }}" class="block rounded bg-white/10 px-3 py-2 text-white md:bg-transparent md:p-0" aria-current="page">Home</a>
+                                <a href="{{ route('home') }}" class="block rounded px-3 py-2 transition-colors md:p-0 {{ request()->routeIs('home') ? 'bg-white/10 text-white md:bg-transparent' : 'text-gray-300 hover:bg-white/10 hover:text-white md:hover:bg-transparent' }}" @if (request()->routeIs('home')) aria-current="page" @endif>Home</a>
                             </li>
                             <li>
-                                <a href="{{ route('about') }}" class="block rounded px-3 py-2 text-gray-300 hover:bg-white/10 hover:text-white md:p-0 md:hover:bg-transparent">About</a>
+                                <a href="{{ route('about') }}" class="block rounded px-3 py-2 transition-colors md:p-0 {{ request()->routeIs('about') ? 'bg-white/10 text-white md:bg-transparent' : 'text-gray-300 hover:bg-white/10 hover:text-white md:hover:bg-transparent' }}" @if (request()->routeIs('about')) aria-current="page" @endif>About</a>
                             </li>
                             <li>
-                                <a href="{{ route('produk') }}" class="block rounded px-3 py-2 text-gray-300 hover:bg-white/10 hover:text-white md:p-0 md:hover:bg-transparent">Produk</a>
+                                <a href="{{ route('produk') }}" class="block rounded px-3 py-2 transition-colors md:p-0 {{ request()->routeIs('produk', 'produk.detail') ? 'bg-white/10 text-white md:bg-transparent' : 'text-gray-300 hover:bg-white/10 hover:text-white md:hover:bg-transparent' }}" @if (request()->routeIs('produk', 'produk.detail')) aria-current="page" @endif>Produk</a>
                             </li>
                             <li>
-                                <a href="{{ route('contact') }}" class="block rounded px-3 py-2 text-gray-300 hover:bg-white/10 hover:text-white md:p-0 md:hover:bg-transparent">Kontak</a>
+                                <a href="{{ route('contact') }}" class="block rounded px-3 py-2 transition-colors md:p-0 {{ request()->routeIs('contact') ? 'bg-white/10 text-white md:bg-transparent' : 'text-gray-300 hover:bg-white/10 hover:text-white md:hover:bg-transparent' }}" @if (request()->routeIs('contact')) aria-current="page" @endif>Kontak</a>
                             </li>
-                            <li class="md:hidden">
+                            <li>
                                 @auth
-                                    <a href="{{ route('dashboard') }}" class="block rounded px-3 py-2 text-gray-300 hover:bg-white/10 hover:text-white">Dashboard</a>
+                                    {{-- <a href="{{ route(auth()->user()->isAdmin() ? 'dashboard' : 'dashboardUser') }}" class="block rounded px-3 py-2 text-gray-300 hover:bg-white/10 hover:text-white">Dashboard</a> --}}
                                 @else
-                                    <a href="{{ route('login') }}" class="block rounded px-3 py-2 text-gray-300 hover:bg-white/10 hover:text-white">Login</a>
+                                    <a href="{{ route('login') }}" class="block rounded px-3 py-2 text-gray-300 hover:bg-white/10 hover:text-white md:hidden">Login</a>
                                 @endauth
                             </li>
                         </ul>

@@ -9,7 +9,7 @@ Alpine.store('cart', {
     toastMessage: '',
     showToast: false,
 
-    async add(productId) {
+    async add(productId, variantId = null) {
         const res = await fetch(`/keranjang/tambah/${productId}`, {
             method: 'POST',
             headers: {
@@ -17,6 +17,7 @@ Alpine.store('cart', {
                 'Accept': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
             },
+            body: JSON.stringify({ variant_id: variantId }),
         });
         const data = await res.json();
         if (data.success) {
@@ -66,15 +67,19 @@ Alpine.store('cart', {
 
 Alpine.start();
 
-
-setTimeout(()=>{
 const loading = document.getElementById('loading');
 if (loading) {
-    loading.style.display = 'none';
+    const hideLoading = () => {
+        loading.classList.add('opacity-0');
+        window.setTimeout(() => loading.remove(), 2000);
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', hideLoading, { once: true });
+    } else {
+        hideLoading();
+    }
 }
-},1500);
-
-
 
 (function () {
     var galleryItems = Array.from(document.querySelectorAll('.gallery-item'));

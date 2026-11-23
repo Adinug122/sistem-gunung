@@ -1,100 +1,76 @@
-<nav x-data="{ open: false }" class="bg-black border-b border-gray-800 sticky top-0 z-50">
-    <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex">
-                <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-white" />
+
+<header class="w-full">
+            <nav x-data="{ open: false }" class="fixed start-0 top-0 z-20 w-full border-b border-white/20 bg-black">
+                <div class="mx-auto flex max-w-screen-xl flex-wrap items-center justify-between p-4">
+                    <a href="{{ route('home') }}" class="flex items-center space-x-3">
+                        <span class="whitespace-nowrap text-lg font-semibold text-white md:text-xl">Rental OutDoor</span>
                     </a>
-                </div>
 
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
-                    <x-user-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Beranda') }}
-                    </x-user-nav-link>
-                </div>
-            </div>
+                    <div class="inline-flex items-center space-x-3 md:order-2">
+                        @auth
+                        <div class="flex gap-2 items-center justify-center" x-data="{}" data-cart-count="{{ collect(session('keranjang', []))->sum(fn($item) => $item['qty'] ?? 0) }}">
+                            <a href="{{ route('keranjang') }}" class="relative group">
+                                <span class="material-symbols-outlined text-white text-2xl">
+                                    shopping_cart
+                                </span>
+                                <span x-show="$store.cart.count > 0" x-text="$store.cart.count"
+                                      class="absolute -top-1 -right-1 bg-[#40916c] text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none">
+                                </span>
+                            </a>
 
-            <!-- Settings Dropdown -->
-            <div class="hidden lg:ms-6 lg:flex lg:items-center">
-                <x-dropdown align="right" width="48" contentClasses="py-1 bg-gray-900 border border-gray-800">
-                    <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-300 hover:text-white focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }}</div>
+                            <a href="{{ route('customer.profile.edit') }}" class="relative group">
+                                <span class="material-symbols-outlined text-white text-2xl">
+                                    account_circle
+                                </span>
+                            </a>
+                        </div>
+                        @else
+                            <a href="{{ route('login') }}" class="hidden rounded-lg border border-white px-4 py-2.5 text-sm font-medium leading-5 text-white hover:bg-white/10 focus:outline-none focus:ring-4 focus:ring-white/30 md:block">
+                                Login
+                            </a>
+                        @endauth
 
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
+                        <button
+                            type="button"
+                            @click="open = !open"
+                            :aria-expanded="open"
+                            aria-controls="landing-navigation"
+                            aria-label="Buka menu navigasi"
+                            class="inline-flex h-9 w-9 items-center justify-center rounded-lg p-2 text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/30 md:hidden"
+                        >
+                            <svg class="h-6 w-6" aria-hidden="true" viewBox="0 0 24 24" fill="none">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M5 7h14M5 12h14M5 17h14"/>
+                            </svg>
                         </button>
-                    </x-slot>
+                    </div>
 
-                    <x-slot name="content">
-                        <x-user-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
-                        </x-user-dropdown-link>
-
-                        <!-- Authentication -->
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-
-                            <x-user-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                {{ __('Log Out') }}
-                            </x-user-dropdown-link>
-                        </form>
-                    </x-slot>
-                </x-dropdown>
-            </div>
-
-            <!-- Hamburger -->
-            <div class="-me-2 flex items-center lg:hidden">
-                <button @click="open = ! open" :aria-expanded="open" aria-controls="user-navigation-menu" aria-label="Toggle navigation menu" class="inline-flex items-center justify-center p-2 rounded-md text-gray-300 hover:text-white hover:bg-white/10 focus:outline-none focus:bg-white/10 focus:text-white transition duration-150 ease-in-out">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Responsive Navigation Menu -->
-    <div id="user-navigation-menu" :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden bg-black">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-user-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Beranda') }}
-            </x-user-responsive-nav-link>
-        </div>
-
-        <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-800">
-            <div class="px-4">
-                <div class="font-medium text-base text-white">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-gray-400">{{ Auth::user()->email }}</div>
-            </div>
-
-            <div class="mt-3 space-y-1">
-                <x-user-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
-                </x-user-responsive-nav-link>
-
-                <!-- Authentication -->
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-
-                    <x-user-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
-                                        this.closest('form').submit();">
-                        {{ __('Log Out') }}
-                    </x-user-responsive-nav-link>
-                </form>
-            </div>
-        </div>
-    </div>
-</nav>
+                    <div
+                        id="landing-navigation"
+                        :class="open ? 'flex' : 'hidden'"
+                        class="w-full items-center justify-between md:order-1 md:flex md:w-auto"
+                    >
+                        <ul class="mt-4 flex w-full flex-col rounded-lg border border-white/20 p-4 font-medium md:mt-0 md:w-auto md:flex-row md:space-x-8 md:border-0 md:p-0">
+                            <li>
+                                <a href="{{ route('home') }}" class="block rounded px-3 py-2 transition-colors md:p-0 {{ request()->routeIs('home') ? 'bg-white/10 text-white md:bg-transparent' : 'text-gray-300 hover:bg-white/10 hover:text-white md:hover:bg-transparent' }}" @if (request()->routeIs('home')) aria-current="page" @endif>Home</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('about') }}" class="block rounded px-3 py-2 transition-colors md:p-0 {{ request()->routeIs('about') ? 'bg-white/10 text-white md:bg-transparent' : 'text-gray-300 hover:bg-white/10 hover:text-white md:hover:bg-transparent' }}" @if (request()->routeIs('about')) aria-current="page" @endif>About</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('produk') }}" class="block rounded px-3 py-2 transition-colors md:p-0 {{ request()->routeIs('produk', 'produk.detail') ? 'bg-white/10 text-white md:bg-transparent' : 'text-gray-300 hover:bg-white/10 hover:text-white md:hover:bg-transparent' }}" @if (request()->routeIs('produk', 'produk.detail')) aria-current="page" @endif>Produk</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('contact') }}" class="block rounded px-3 py-2 transition-colors md:p-0 {{ request()->routeIs('contact') ? 'bg-white/10 text-white md:bg-transparent' : 'text-gray-300 hover:bg-white/10 hover:text-white md:hover:bg-transparent' }}" @if (request()->routeIs('contact')) aria-current="page" @endif>Kontak</a>
+                            </li>
+                            <li>
+                                @auth
+                                    {{-- <a href="{{ route(auth()->user()->isAdmin() ? 'dashboard' : 'dashboardUser') }}" class="block rounded px-3 py-2 text-gray-300 hover:bg-white/10 hover:text-white">Dashboard</a> --}}
+                                @else
+                                    <a href="{{ route('login') }}" class="block rounded px-3 py-2 text-gray-300 hover:bg-white/10 hover:text-white md:hidden">Login</a>
+                                @endauth
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>

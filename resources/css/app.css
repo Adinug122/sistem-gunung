@@ -5,6 +5,74 @@
 @plugin "flowbite/plugin";
 @source "../../node_modules/flowbite";
 
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    font-feature-settings: 'liga';
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+.loader {
+    --color-1: rgba(255, 255, 255, 0.8);
+    --color-2: #fff;
+    --size: 1px;
+
+    position: relative;
+    width: calc(64 * var(--size));
+    height: calc(64 * var(--size));
+    border-radius: 50%;
+    background: var(--color-1);
+}
+
+.loader::before,
+.loader::after {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: calc(64 * var(--size));
+    height: calc(64 * var(--size));
+    border-radius: 50%;
+    background: var(--color-2);
+    content: '';
+    opacity: 0.5;
+    animation: slide 1s infinite linear alternate;
+}
+
+.loader::after {
+    animation-name: slide2;
+    opacity: 1;
+}
+
+@keyframes slide {
+    0%,
+    20% {
+        transform: translate(0, 0);
+    }
+    80%,
+    100% {
+        transform: translate(calc(15 * var(--size)), calc(15 * var(--size)));
+    }
+}
+
+@keyframes slide2 {
+    0%,
+    20% {
+        transform: translate(0, 0);
+    }
+    80%,
+    100% {
+        transform: translate(calc(-15 * var(--size)), calc(-15 * var(--size)));
+    }
+}
+
 @layer base {
     :root {
         --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
@@ -26,55 +94,6 @@
         --color-primary: #0f0f0f;
         --color-primary-hover: #1a1a1a;
     }
-}
-
-.loader {
-  --color-1: rgba(255, 255, 255, 0.8);
-  --color-2: #fff;
-  --size: 1px;
-
-  width: calc(64 * var(--size));
-  height: calc(64 * var(--size));
-  border-radius: 50%;
-  position: relative;
-  background: var(--color-1);
-}
-.loader:before,
-.loader:after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: calc(64 * var(--size));
-  height: calc(64 * var(--size));
-  border-radius: 50%;
-  background: var(--color-2);
-  animation: slide 1s infinite linear alternate;
-  opacity: 0.5;
-}
-.loader:after {
-  animation: slide2 1s infinite linear alternate;
-  opacity: 1;
-}
-@keyframes slide {
-  0%,
-  20% {
-    transform: translate(0, 0);
-  }
-  80%,
-  100% {
-    transform: translate(calc(15 * var(--size)), calc(15 * var(--size)));
-  }
-}
-@keyframes slide2 {
-  0%,
-  20% {
-    transform: translate(0, 0);
-  }
-  80%,
-  100% {
-    transform: translate(calc(-15 * var(--size)), calc(-15 * var(--size)));
-  }
 }
 
 @layer components {
@@ -130,3 +149,16 @@
         background: #40916c url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E") center / 80% no-repeat;
     }
     .cb:focus-visible { outline: 2px solid #40916c; outline-offset: 2px; }
+
+.auth-input {
+    caret-color: #fff;
+}
+
+.auth-input:-webkit-autofill,
+.auth-input:-webkit-autofill:hover,
+.auth-input:-webkit-autofill:focus,
+.auth-input:-webkit-autofill:active {
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: #fff !important;
+    transition: background-color 9999s ease-out 0s;
+}

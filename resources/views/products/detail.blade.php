@@ -14,6 +14,7 @@
             </nav>
 
             <div class="grid items-start gap-8 lg:grid-cols-[minmax(0,1.6fr)_minmax(19rem,0.8fr)]">
+                {{-- KOLOM KIRI --}}
                 <div>
                     <div class="mb-5">
                         <p class="mb-2 text-sm font-semibold uppercase tracking-[0.16em] text-[#40916c]">
@@ -59,45 +60,77 @@
                     </section>
                 </div>
 
-                <aside class="space-y-6 lg:sticky lg:top-28">
-                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-                        <div class="flex items-start justify-between gap-4">
-                            <div>
-                                <p class="text-sm text-gray-500">Harga sewa</p>
-                                <p class="mt-1 text-2xl font-bold text-[#1b1b18]">
-                                    Rp {{ number_format($product->price_per_day, 0, ',', '.') }}
-                                    <span class="text-sm font-medium text-gray-500">/ hari</span>
+                {{-- KOLOM KANAN (diam, ikut alur halaman) --}}
+                <aside class="space-y-6 mt-[85px]">
+                    <section
+                        class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-slate-200/60"
+                        x-data="{
+                            selectedVariant: null,
+                            selectedPrice: {{ $product->price_per_day }},
+                            selectedStock: {{ $availableVariants->isNotEmpty() ? $availableVariants->sum('stock') : $product->stock }},
+                            hasVariants: {{ $availableVariants->isNotEmpty() ? 'true' : 'false' }},
+                            currency: (p) => 'Rp ' + Number(p).toLocaleString('id-ID'),
+                        }"
+                    >
+                        {{-- Header harga --}}
+                        <div class="bg-gradient-to-br from-[#40916c] to-[#2d6a4f] p-6 text-white">
+                            <p class="text-xs font-semibold uppercase tracking-widest text-white/70">Harga sewa</p>
+                            <div class="mt-1 flex items-end justify-between gap-3">
+                                <p class="text-3xl font-extrabold leading-none">
+                                    <span x-text="currency(selectedPrice)">Rp {{ number_format($product->price_per_day, 0, ',', '.') }}</span>
+                                    <span class="text-sm font-medium text-white/70">/ hari</span>
                                 </p>
+                                <span
+                                    class="rounded-full px-3 py-1 text-xs font-bold"
+                                    :class="selectedStock <= 2 ? 'bg-red-100 text-red-700' : 'bg-white/20 text-white'"
+                                    x-text="selectedStock <= 0 ? 'Habis' : 'Stok ' + selectedStock"
+                                ></span>
                             </div>
-                            <span class="rounded-lg bg-[#f5f5f0] px-3 py-2 text-sm font-semibold text-[#40916c]">
-                                Stok {{ $product->stock }}
-                            </span>
                         </div>
 
-                        <p class="mt-5 rounded-xl bg-[#f5f5f0] p-4 text-sm leading-6 text-gray-600">
-                            Harga sewa dihitung per hari. Atur jumlah dan durasi saat proses pemesanan.
-                        </p>
+                        <div class="p-6">
+                            @if ($availableVariants->isNotEmpty())
+                                <p class="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-500">Pilih Varian</p>
+                                <div class="grid grid-cols-3 gap-2">
+                                    @foreach ($availableVariants as $variant)
+                                        <button
+                                            type="button"
+                                            @disabled($variant->stock < 1)
+                                            @click="selectedVariant = {{ $variant->id }}; selectedPrice = {{ $variant->price_per_day ?? $product->price_per_day }}; selectedStock = {{ $variant->stock }}"
+                                            :class="selectedVariant === {{ $variant->id }}
+                                                ? 'border-[#40916c] bg-[#40916c]/10 text-[#2d6a4f] ring-2 ring-[#40916c]/30'
+                                                : 'border-slate-200 bg-white text-gray-700 hover:border-[#40916c]/50'"
+                                            class="rounded-xl border px-3 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-gray-400 disabled:line-through"
+                                        >{{ $variant->variant_name }}</button>
+                                    @endforeach
+                                </div>
+                                <p class="mt-3 text-xs text-gray-500">Harga dan stok menyesuaikan varian yang dipilih.</p>
+                            @endif
 
-                        @if ($product->stock > 0)
-                            @auth
-                                <button
-                                    x-data="{ adding: false }"
-                                    @click.prevent="adding = true; $store.cart.add($el.dataset.id).finally(() => adding = false)"
-                                    :disabled="adding"
-                                    data-id="{{ $product->id }}"
-                                    class="mt-5 w-full rounded-xl bg-[#40916c] px-5 py-3.5 text-center font-semibold text-white transition hover:bg-[#1b1b18] disabled:cursor-not-allowed disabled:opacity-70"
-                                    x-text="adding ? 'Menambahkan...' : 'Tambah ke Keranjang'"
-                                ></button>
+                            <p class="mt-5 rounded-xl bg-[#f5f5f0] p-4 text-sm leading-6 text-gray-600">
+                                Harga sewa dihitung per hari. Atur jumlah dan durasi saat proses pemesanan.
+                            </p>
+
+                            @if ($product->stock > 0 || $availableVariants->isNotEmpty())
+                                @auth
+                                    <button
+                                        x-data="{ adding: false }"
+                                        @click.prevent="adding = true; $store.cart.add({{ $product->id }}, selectedVariant).finally(() => adding = false)"
+                                        :disabled="adding || (hasVariants && !selectedVariant) || selectedStock <= 0"
+                                        class="mt-5 w-full rounded-xl bg-[#40916c] px-5 py-3.5 font-semibold text-white shadow-md shadow-[#40916c]/30 transition hover:-translate-y-0.5 hover:bg-[#1b1b18] disabled:translate-y-0 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none"
+                                        x-text="adding ? 'Menambahkan...' : (hasVariants && !selectedVariant ? 'Pilih varian dulu' : 'Tambah ke Keranjang')"
+                                    ></button>
+                                @else
+                                    <a href="{{ route('login') }}" class="mt-5 block w-full rounded-xl bg-[#40916c] px-5 py-3.5 text-center font-semibold text-white shadow-md shadow-[#40916c]/30 transition hover:-translate-y-0.5 hover:bg-[#1b1b18]">
+                                        Login untuk Menyewa
+                                    </a>
+                                @endauth
                             @else
-                                <a href="{{ route('login') }}" class="mt-5 block w-full rounded-xl bg-[#40916c] px-5 py-3.5 text-center font-semibold text-white transition hover:bg-[#1b1b18]">
-                                    Login untuk Menyewa
-                                </a>
-                            @endauth
-                        @else
-                            <button type="button" disabled class="mt-5 w-full cursor-not-allowed rounded-xl bg-gray-300 px-5 py-3.5 font-semibold text-gray-600">
-                                Stok Habis
-                            </button>
-                        @endif
+                                <button type="button" disabled class="mt-5 w-full cursor-not-allowed rounded-xl bg-gray-300 px-5 py-3.5 font-semibold text-gray-600">
+                                    Stok Habis
+                                </button>
+                            @endif
+                        </div>
                     </section>
 
                     @if ($relatedProducts->isNotEmpty())

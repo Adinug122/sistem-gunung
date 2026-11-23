@@ -70,6 +70,9 @@
                             </div>
 
                             <div class="mt-4 flex gap-2">
+                                <a href="{{ route('variants.index', $product) }}" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900 text-xs font-medium py-2 px-3 rounded-lg text-center transition-colors">
+                                    Varian
+                                </a>
                                 <a href="{{ route('products.show', $product) }}" class="flex-1 bg-[#40916c] hover:bg-[#14532d] text-white text-xs font-medium py-2 px-3 rounded-lg text-center transition-colors">
                                     Lihat
                                 </a>
@@ -151,11 +154,111 @@
                         @enderror
                     </div>
 
-                    <div>
+                    <div x-data="{
+                        preview: null,
+                        isDragover: false,
+                        uploadError: '',
+                        handleDrop(event) {
+                            this.isDragover = false;
+                            const file = event.dataTransfer?.files?.[0];
+                            if (file) this.handleFile(file);
+                        },
+                        handleFileSelect(event) {
+                            const file = event.target.files?.[0];
+                            if (file) this.handleFile(file);
+                        },
+                        handleFile(file) {
+                            const allowed = ['image/jpeg','image/png','image/jpg','image/webp'];
+                            if (!allowed.includes(file.type)) {
+                                this.uploadError = 'Format gambar yang diizinkan: JPG, JPEG, PNG, WEBP.';
+                                this.clearPreview();
+                                this.$refs.image.value = '';
+                                return;
+                            }
+                            if (file.size > 20 * 1024 * 1024) {
+                                this.uploadError = 'Ukuran gambar maksimal 20 MB.';
+                                this.clearPreview();
+                                this.$refs.image.value = '';
+                                return;
+                            }
+                            this.uploadError = '';
+                            this.clearPreview();
+                            this.preview = URL.createObjectURL(file);
+
+                            const dataTransfer = new DataTransfer();
+                            dataTransfer.items.add(file);
+                            this.$refs.image.files = dataTransfer.files;
+                        },
+                        clearPreview() {
+                            if (this.preview) URL.revokeObjectURL(this.preview);
+                            this.preview = null;
+                        },
+                        removeImage() {
+                            this.$refs.image.value = '';
+                            this.uploadError = '';
+                            this.clearPreview();
+                        },
+                    }">
                         <x-input-label for="image" value="Gambar Produk" />
-                        <input type="file" name="image" id="image" accept="image/*" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                        <div
+                            @dragover.prevent="isDragover = true"
+                            @dragleave.self.prevent="isDragover = false"
+                            @drop.prevent="handleDrop($event)"
+                            class="relative border-2 border-dashed rounded-xl p-8 text-center transition-colors duration-200"
+                            x-bind:class="{
+                                'border-[#40916c] bg-[#40916c]/5': isDragover,
+                                'border-gray-300 bg-white hover:border-[#40916c]': !isDragover,
+                                'bg-gray-50': preview,
+                            }"
+                            @click.self="$refs.image.click()"
+                            @keydown.enter.prevent="$refs.image.click()"
+                            @keydown.space.prevent="$refs.image.click()"
+                            role="button"
+                            tabindex="0"
+                            aria-label="Pilih atau jatuhkan gambar produk"
+                            style="min-height: 240px;"
+                        >
+                            <input
+                                id="image"
+                                x-ref="image"
+                                name="image"
+                                type="file"
+                                accept="image/jpeg,image/png,image/jpg,image/webp"
+                                class="hidden"
+                                @change="handleFileSelect($event)"
+                            >
+
+                            <template x-if="preview">
+                                <div class="absolute inset-2 flex items-center justify-center">
+                                    <img :src="preview" alt="Preview gambar produk" class="max-h-48 max-w-full rounded-lg object-contain">
+                                    <div class="absolute right-2 top-2 flex gap-2">
+                                        <button type="button" @click.stop="$refs.image.click()" class="rounded-lg bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow hover:bg-gray-100">
+                                            Ganti
+                                        </button>
+                                        <button type="button" @click.stop="removeImage()" class="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white shadow hover:bg-red-700">
+                                            Hapus
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <div x-show="!preview" class="flex flex-col items-center justify-center h-full">
+                                <button type="button" @click.stop="$refs.image.click()" class="inline-flex items-center gap-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[#40916c]">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="17 8 12 3 7 8"></polyline>
+                                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                                    </svg>
+                                    Upload
+                                </button>
+                                <p class="mt-3 text-sm text-gray-600 pointer-events-none">Choose an image or drag &amp; drop it here.</p>
+                                <p class="mt-1 text-xs text-gray-500 pointer-events-none">JPG, JPEG, PNG and WEBP. Max 20 MB.</p>
+                            </div>
+
+                        </div>
+                        <p x-show="uploadError" x-text="uploadError" role="alert" class="mt-2 text-sm text-red-600"></p>
                         @error('image')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
 

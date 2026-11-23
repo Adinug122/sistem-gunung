@@ -27,11 +27,11 @@
                 </header>
             @endisset
 
-           <div id="loading" class="fixed inset-0 z-[999] flex flex-col items-center justify-center bg-black">
-    <span class="loader"></span> 
-    <p class="text-white pt-5 animate-pulse">Sabar Masih Loading</p>
-</div>
-            
+             <div id="loading" class="pointer-events-none fixed inset-0 z-40 flex flex-col items-center justify-center bg-black transition-opacity duration-300" role="status" aria-live="polite">
+                 <span class="loader"></span>
+                 <p class="pt-5 text-white animate-pulse">Sabar Masih Loading</p>
+             </div>
+
             <!-- Page Content -->
             <main>
                 {{ $slot }}

@@ -93,7 +93,7 @@
                                     <div class="flex-1 min-w-0">
                                         <h3 class="font-bold text-[#1b1b18] leading-snug" x-text="item.name"></h3>
                                         <p class="mt-1 text-sm text-[#666]"
-                                           x-text="`${item.category?.name ?? 'Outdoor'} • Rp ${fmt(item.price_per_day)}/hari`"></p>
+                                           x-text="`${item.category?.name ?? 'Outdoor'}${item.variant_name ? ' • ' + item.variant_name : ''} • Rp ${fmt(item.price_per_day)}/hari`"></p>
 
                                         <div class="mt-3 flex items-center gap-4">
                                             <div class="inline-flex items-center rounded-xl border border-slate-300 bg-white overflow-hidden">
@@ -161,7 +161,7 @@
                                     <div class="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-[#f5f5f0]/60 px-4 py-3">
                                         <div class="min-w-0">
                                             <p class="truncate text-sm font-medium text-[#1b1b18]" x-text="item.name"></p>
-                                            <p class="text-xs text-[#666]" x-text="`${item.qty}× Rp ${fmt(item.price_per_day)}`"></p>
+                                            <p class="text-xs text-[#666]" x-text="`${item.qty}× Rp ${fmt(item.price_per_day)}${item.variant_name ? ' (' + item.variant_name + ')' : ''}`"></p>
                                         </div>
                                         <p class="font-bold text-sm text-[#1b1b18] shrink-0" x-text="`Rp ${fmt(item.price_per_day * item.qty)}`"></p>
                                     </div>
@@ -267,9 +267,10 @@
                     /* ---------- aksi keranjang ---------- */
                     async updateQty(productId, qty) {
                         if (qty < 1) { return this.removeItem(productId); }
-                        const current = this.items.find(i => i.id === productId)?.qty || 1;
+                        const item = this.items.find(i => i.id === productId) || {};
+                        const current = item.qty || 1;
                         this.loading.push(productId);
-                        const data = await post(`/keranjang/tambah/${productId}`, { qty: qty - current });
+                        const data = await post(`/keranjang/tambah/${productId}`, { qty: qty - current, variant_id: item.variant_id || null });
                         this.loading = this.loading.filter(id => id !== productId);
                         if (data.success) {
                             this.syncCount(data.count);
@@ -280,8 +281,9 @@
 
                     async removeItem(productId, ask = true) {
                         if (ask && !confirm('Hapus produk dari keranjang?')) return;
+                        const item = this.items.find(i => i.id === productId) || {};
                         this.loading.push(productId);
-                        const data = await post(`/keranjang/hapus/${productId}`);
+                        const data = await post(`/keranjang/hapus/${productId}`, { variant_id: item.variant_id || null });
                         this.loading = this.loading.filter(id => id !== productId);
                         if (data.success) {
                             this.syncCount(data.count);

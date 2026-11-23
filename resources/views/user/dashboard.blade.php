@@ -116,7 +116,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                                 </svg>
                             </a>
-                            <a href="{{ route('profile.edit') }}" class="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-[#40916c] bg-white text-[#14532d] font-medium hover:bg-[#14532d] hover:text-white transition-colors text-left">
+                            <a href="{{ route('customer.profile.edit') }}" class="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-[#40916c] bg-white text-[#14532d] font-medium hover:bg-[#14532d] hover:text-white transition-colors text-left">
                                 <span>Edit Profil</span>
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>

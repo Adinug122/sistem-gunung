@@ -19,7 +19,6 @@ return new class extends Migration
             $table->integer('stock')->default(0);
             $table->decimal('price_per_day', 12, 2)->nullable();
             $table->timestamps();
-
             $table->index('product_id');
             $table->index('sku');
         });

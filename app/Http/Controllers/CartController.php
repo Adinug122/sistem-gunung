@@ -13,15 +13,33 @@ class CartController extends Controller
         $keranjang = session('keranjang', []);
         $produk = collect();
 
-        foreach ($keranjang as $id => $item) {
-            $product = Product::with('category')->find($id);
-            if ($product) {
-                $produk->push((object) array_merge($product->toArray(), [
-                    'qty' => $item['qty'] ?? 1,
-                    'image_url' => $product->image ? asset('storage/'.$product->image) : null,
-                    'has_image' => $product->image && Storage::disk('public')->exists($product->image),
-                ]));
+        foreach ($keranjang as $key => $item) {
+            $parts = explode('.', $key, 2);
+            $productId = (int) $parts[0];
+            $variantId = isset($parts[1]) ? (int) $parts[1] : null;
+
+            $product = Product::with('category')->find($productId);
+            if (! $product) {
+                continue;
             }
+
+            $variant = null;
+            if ($variantId) {
+                $variant = $product->variants()->find($variantId);
+            }
+
+            $price = ($variant && $variant->price_per_day !== null)
+                ? $variant->price_per_day
+                : $product->price_per_day;
+
+            $produk->push((object) array_merge($product->toArray(), [
+                'qty' => $item['qty'] ?? 1,
+                'variant_id' => $variantId,
+                'variant_name' => $variant ? $variant->variant_name : null,
+                'price_per_day' => $price,
+                'image_url' => $product->image ? asset('storage/'.$product->image) : null,
+                'has_image' => $product->image && Storage::disk('public')->exists($product->image),
+            ]));
         }
 
         $total = $produk->sum(fn ($item) => $item->price_per_day * $item->qty);
@@ -40,22 +58,41 @@ class CartController extends Controller
 
     public function store(Request $request, Product $product)
     {
-        $request->validate(['qty' => 'nullable|integer']);
+        $request->validate([
+            'qty' => 'nullable|integer|min:1',
+            'variant_id' => 'nullable|exists:product_variants,id',
+        ]);
 
+        $variantId = $request->input('variant_id');
         $delta = (int) ($request->input('qty', 1));
+
+        $variant = null;
+        if ($variantId) {
+            $variant = $product->variants()->find($variantId);
+            if (! $variant) {
+                $message = 'Varian tidak ditemukan.';
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['success' => false, 'message' => $message], 404);
+                }
+
+                return back()->with('error', $message);
+            }
+        }
+
+        $key = $variantId ? "{$product->id}.{$variantId}" : (string) $product->id;
         $keranjang = session('keranjang', []);
 
-        if (isset($keranjang[$product->id])) {
-            $keranjang[$product->id]['qty'] += $delta;
-            if ($keranjang[$product->id]['qty'] <= 0) {
-                unset($keranjang[$product->id]);
-                $message = "{$product->name} dihapus dari keranjang.";
+        if (isset($keranjang[$key])) {
+            $keranjang[$key]['qty'] += $delta;
+            if ($keranjang[$key]['qty'] <= 0) {
+                unset($keranjang[$key]);
+                $message = "{$product->name}".($variant ? " ({$variant->variant_name})" : '').' dihapus dari keranjang.';
             } else {
-                $message = "{$product->name} diperbarui di keranjang.";
+                $message = "{$product->name}".($variant ? " ({$variant->variant_name})" : '').' diperbarui di keranjang.';
             }
         } else {
-            $keranjang[$product->id] = ['qty' => $delta];
-            $message = "{$product->name} berhasil ditambahkan ke keranjang.";
+            $keranjang[$key] = ['qty' => $delta, 'variant_id' => $variantId];
+            $message = "{$product->name}".($variant ? " ({$variant->variant_name})" : '').' berhasil ditambahkan ke keranjang.';
         }
 
         session(['keranjang' => $keranjang]);
@@ -75,12 +112,21 @@ class CartController extends Controller
 
     public function destroy(Product $product, Request $request)
     {
+        $variantId = $request->input('variant_id');
+        $key = $variantId ? "{$product->id}.{$variantId}" : (string) $product->id;
+
         $keranjang = session('keranjang', []);
-        unset($keranjang[$product->id]);
+        $variantName = null;
+        if (isset($keranjang[$key]) && $variantId) {
+            $variant = $product->variants()->find($variantId);
+            $variantName = $variant ? $variant->variant_name : null;
+        }
+
+        unset($keranjang[$key]);
         session(['keranjang' => $keranjang]);
 
         $count = collect($keranjang)->sum(fn ($item) => $item['qty'] ?? 0);
-        $message = "{$product->name} dihapus dari keranjang.";
+        $message = "{$product->name}".($variantName ? " ({$variantName})" : '').' dihapus dari keranjang.';
 
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([

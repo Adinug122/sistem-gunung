@@ -12,6 +12,14 @@ test('profile page is displayed', function () {
     $response->assertOk();
 });
 
+test('admin can access their profile', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+
+    $this->actingAs($admin)
+        ->get('/profile')
+        ->assertOk();
+});
+
 test('profile information can be updated', function () {
     $user = User::factory()->create();
 
